@@ -1,7 +1,8 @@
 /*******************************************************************************
-Project: Pakistan Costs of Hiring Women
+Project: Pakistan Punjab Police Project
 
-Purpose: Conduct basic data cleaning on the baseline survey data
+Purpose: Clean the FIR data
+output: clean_fir_allyears.dta
 ********************************************************************************/
 	
 
@@ -27,9 +28,12 @@ Purpose: Conduct basic data cleaning on the baseline survey data
 	global modData 		"$dropbox/Data/modifiedData"
 	global dofiles		"$git/code_datawork"
 	
-	di "$rawData"
 	
-	
+	****************
+	* Data cleaning
+	****************
+
+	***** Read all raw data
 	local filelist: dir "$rawData/FIR/" files `"*.xlsx"', respectcase
 	di `filelist'
 	foreach file of local filelist {
@@ -51,11 +55,21 @@ Purpose: Conduct basic data cleaning on the baseline survey data
 	append using `FIRList2020_2'
 	
 	***** Check for and clean duplicates 
+	
+	* Remove completely identifcal cases
 	local allvars "fir_no fir_year fir_datetime datetime_of_event other_not_event_datetime dist_name_eng ps_name_eng crime_name_eng secName pe_name"
 	duplicates report `allvars'
-	duplicates drop `allvars', force // Keep only the first occurence of each case. Since I check duplicates on all variables, they are identical.
+	duplicates drop `allvars', force 
 	qui: duplicates report `allvars'
 	assert r(unique_value) == r(N) // Sanity check
+	
+	* Each case should be identified with the following ID variables
+	local idvars "fir_no fir_year dist_name_eng ps_name_eng"
+	duplicates report `idvars'
+	duplicates drop `idvars', force
+	qui: duplicates report `idvars'
+	assert r(unique_value) == r(N) // Sanity check
+	
 	
 	***** Make an unique FIR ID
 	gen firid = _n
