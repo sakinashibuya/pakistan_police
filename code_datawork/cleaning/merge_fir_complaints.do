@@ -34,11 +34,14 @@ Output: merged_fir_complaints_lahore.dta
 
 
 	***** Merge the FIR & Complaint data
-	
-	merge 1:m fir_no fir_year dist_name_eng ps_name_eng ///
-		using "$modData/FIR/clean_complaints_lahore.dta", ///
+	merge 1:1 fir_no fir_year dist_name_eng ps_name_eng ///
+		using "$modData/Complaints/clean_complaints_lahore.dta", ///
 		gen(source)
 		
+	/* Notes:
+	duplicates report firid 
+	All duplicates come from source == 2 (using data with no match in FIR data)
+	*/
 	label def source 1 "FIR" 2 "Complaints (Lahore)" 3 "In both"
 	label val source source
 	label var source "Data source"
@@ -51,3 +54,6 @@ Output: merged_fir_complaints_lahore.dta
 	label var time_comp2fir "Complaint-FIR convertion time (hours)"
 	
 	save "$modData/merged_fir_complaints_lahore.dta", replace 
+
+	
+	

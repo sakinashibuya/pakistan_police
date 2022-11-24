@@ -1,52 +1,3 @@
-/*
-This dofile is to be executed from Master_Pooledanalysis.do.
-It creates a latex file with a weekly data check report.
-*/
-
-
-* Initialize the latex file
-texdoc init "$output/ExploratoryNotes.tex", replace
-
-
-* Load data
-use "$modData/merged_fir_complaints_lahore.dta", clear
-tempfile mergedData
-save `mergedData'
-
-use "$modData/FIR/clean_fir_allyears.dta", clear
-tempfile fir
-save `fir'
-
-use "$modData/Complaints/clean_complaints_lahore.dta", clear
-tempfile complaints
-save `complaints'
-	
-		
-******************************************************************************** 
-* Data Overview
-******************************************************************************** 
-
-texdoc stlog, nolog
-
-	use `fir', clear
-	qui: unique firid
-	texdoc local firUniN = r(unique)
-
-	use `complaints', clear
-	qui: unique compid
-	texdoc local cmpUniN = r(unique)
-
-	
-	use `mergedData', clear
-	qui table source, statistic(freq) statistic(percent)
-	collect title "Match between the FIR and Complaint Data"
-	collect export "$output/freq_dataSource.tex", replace tableonly
-	
-texdoc stlog close
-		
-
-	
-/***
 
 \documentclass[11pt]{article}
 
@@ -113,45 +64,12 @@ This document provides notes on our exploration of the Complaints and First Impr
 \section{Dataset Overview}
 
 The numbers of unique observations for each of the FIR and Complaint datasets are the following: \\
-\noindent Unique Complaints cases $\rightarrow$  `cmpUniN' \\
-\noindent Unique FIR cases $\rightarrow$ `firUniN'
+\noindent Unique Complaints cases $\rightarrow$  154058 \\
+\noindent Unique FIR cases $\rightarrow$ 2255694
 
 The merged FIR + Complaint dataset looks like this. The ``In both" category shows the unique matched observations between the two datasets.
 \input{freq_dataSource}
 
-***/	
-
-******************************************************************************** 
-* Time from Complaint to FIR
-******************************************************************************** 
-
-use `mergedData', clear
-keep if source == 3
-
-texdoc stlog, nolog	
-	
-	gen responsetime_hr = responsetime/(60*60)
-	label var responsetime_hr "Complaint-1st Contact Time (hours)"
-	
-	estpost tabstat responsetime_hr time_comp2fir, stat(count min max med mean) col(stat)
-	esttab using "$output/sum_time.tex", replace label nonumber title("Response Speed") ///
-		cells("count min max p50 mean") float
-	
-	estpost tabstat responsetime_hr time_comp2fir if responsetime_hr > 0 & time_comp2fir > 0, stat(count min max med mean) col(stat)
-	esttab using "$output/sum_time_noNeg.tex", replace label nonumber title("Response Speed") ///
-		cells("count min max p50 mean") float
-	
-	
-	histogram responsetime_hr if responsetime_hr < 100, freq
-	graph export "$output/Hist_responsetime.png", replace
-	
-	histogram time_comp2fir if time_comp2fir > 0 & time_comp2fir < 100, freq
-	graph export "$output/Hist_timeComp2Fir.png", replace
-	
-	
-texdoc stlog close
-
-/***
 
 \section{Response Speed}
 
@@ -184,10 +102,6 @@ A question: Why do we see some waves?
 		\end{subfigure}
 	\end{figure}
 	
-***/
-
-
-/*** 
 %\begin{table}[H]
 %\adjustbox{max width=\textwidth}{
 %\input{Effects_Updating_Other_exp_donate_pmcf}
@@ -222,4 +136,3 @@ A question: Why do we see some waves?
 
 \end{document}
 
-***/
