@@ -70,6 +70,14 @@ Output: clean_complaints_lahore
 	*quick sanity check gen double responsetime2 = (comp_mod_datetime - comp_datetime)/60
 	
 	
+	replace ps_name_eng = "Hadiara" if ps_name_eng == "Hadyara"
+	replace ps_name_eng = "Shafiq Abad" if ps_name_eng == "Shafiqabad"
+	replace ps_name_eng = "Town Ship" if ps_name_eng == "Town Ship "
+	replace ps_name_eng = "Liaqat Abad" if ps_name_eng == "Liaqatabad"
+	replace ps_name_eng = "Mustafa Abad" if ps_name_eng == "Mustafabad"
+
+
+	 
 	***** Identify and drop duplicates
 	duplicates report fir_no fir_year ps_name_eng ComplaintRecord
 	duplicates drop fir_no fir_year ps_name_eng ComplaintRecord, force // Drop identical cases
