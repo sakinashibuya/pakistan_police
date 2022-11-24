@@ -75,6 +75,12 @@ output: clean_fir_allyears.dta
 	gen firid = _n
 	label var firid "FIR ID (unique)"
 	
+	
+	***** Clean PS names
+	replace ps_name_eng = "Hadiara" if ps_name_eng == "Hadira"
+	replace ps_name_eng = "Mustafa Town" if ps_name_eng == "Mustafa town"
+
+	
 	label var fir_no "FIR number"
 	label var fir_year "Year (FIR created)"
 	label var fir_datetime "Date + Time (FIR created)"
